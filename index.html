@@ -512,7 +512,11 @@
       currentData = data;
       const sourceUrl = safeUrl(data.sourcePdfUrl || data.officialPdfUrl || "");
       $("#sourceUrl").value = sourceUrl;
-      const meta = [data.exam, data.year ? `${data.year} 年` : "", sourceUrl ? `<a class="source-link" href="${escapeHtml(sourceUrl)}" target="_blank" rel="noopener">官方 PDF ↗</a>` : ""].filter(Boolean).map((item) => item.startsWith("<a ") ? item : `<span class="meta-chip">${escapeHtml(item)}</span>`).join("");
+      const metaItems = [];
+      if (data.exam) metaItems.push(`<span class="meta-chip">${escapeHtml(data.exam)}</span>`);
+      if (data.year) metaItems.push(`<span class="meta-chip">${escapeHtml(data.year)} 年</span>`);
+      if (sourceUrl) metaItems.push(`<a class="meta-chip source-link" href="${escapeHtml(sourceUrl)}" target="_blank" rel="noopener">官方 PDF ↗</a>`);
+      const meta = metaItems.join("");
       const logic = (data.logicChain || []).map((item) => `<span>${escapeHtml(item)}</span>`).join("");
       const evidenceMap = buildEvidenceMap(data);
       const paragraphs = (data.paragraphs || []).map((paragraph, i) => renderParagraph(paragraph, i, evidenceMap)).join("");
