@@ -107,6 +107,8 @@
     .lesson-meta { display: flex; flex-wrap: wrap; gap: 7px; }
     .meta-chip { border: 1px solid #dfe7df; color: #617674; background: rgba(255,255,255,.65); padding: 5px 9px; border-radius: 999px; font-size: 9px; }
     .source-link { color: #15766b; text-decoration: underline; text-underline-offset: 2px; }
+    .source-verification { margin-top: 10px; border-left: 2px solid #4d9b82; padding: 3px 0 3px 9px; color: #71807a; font-size: 9px; line-height: 1.6; }
+    .source-verification strong { color: #34796b; margin-right: 5px; }
     .overview { padding: 20px clamp(20px, 4.5vw, 48px); border-bottom: 1px solid #ece9de; display: grid; grid-template-columns: 140px 1fr; gap: 16px; align-items: start; }
     .overview-label { color: #4e8176; font-size: 10px; font-weight: 850; letter-spacing: .12em; padding-top: 3px; }
     .overview-copy { font-family: Georgia, "Songti SC", serif; line-height: 1.85; color: #405a5b; font-size: 13px; }
@@ -231,47 +233,53 @@
       <div>
         <div class="eyebrow">考研英语 · 精读工作台</div>
         <h1>原文读得清，证据看得见。</h1>
-        <p>上传阅读题照片或官方 PDF，在浏览器里提取原文；把精读讲解导入后，生成英文逐句排布、中文紧跟原句、重点词标红、段落词组侧注、题目证据高亮的讲义。</p>
+        <p>把题目照片发在当前 ChatGPT 对话里，我先根据年份、科目和题目线索检索并核对官方 PDF；网页只接收已确认的 PDF 文字和精读讲义，排出英文逐句对照、红色重点词、段落侧注与答案证据高亮。</p>
       </div>
-      <div class="progress-pill"><strong>01 — 03</strong>原文 → 精读 → 讲义</div>
+      <div class="progress-pill"><strong>01 — 03</strong>官方 PDF → 精读 → 讲义</div>
     </section>
 
     <main class="workspace">
       <aside class="panel source-panel">
-        <div class="panel-head"><h2>原文与官方来源</h2><span class="step">SOURCE</span></div>
+        <div class="panel-head"><h2>官方 PDF 原文</h2><span class="step">SOURCE FIRST</span></div>
         <div class="source-body">
           <label class="upload-zone" id="dropZone" for="sourceFiles">
             <span class="upload-icon">＋</span>
-            <strong>拍照上传，或选择 PDF</strong>
-            <small>支持图片和 PDF，可多选<br>照片留在当前浏览器，不会上传到本项目服务器</small>
+            <strong>选择已确认的官方 PDF</strong>
+            <small>照片请直接上传到当前 ChatGPT 对话<br>此处只读取官方 PDF，不用 OCR 猜原文</small>
           </label>
-          <input id="sourceFiles" class="file-picker" type="file" accept="image/*,application/pdf,.pdf" multiple>
+          <input id="sourceFiles" class="file-picker" type="file" accept="application/pdf,.pdf" multiple>
           <div id="previewList" class="preview-list"></div>
 
+          <label class="field-label" for="examYear">年份 / 考试信息</label>
+          <input class="text-input" id="examYear" type="text" placeholder="例如：2014">
+          <label class="field-label" for="examPaper">科目与试卷</label>
+          <input class="text-input" id="examPaper" type="text" placeholder="例如：考研英语二">
+          <label class="field-label" for="passageNo">文章编号</label>
+          <input class="text-input" id="passageNo" type="text" placeholder="例如：Text 1 / 阅读第 2 篇">
           <label class="field-label" for="sourceUrl">官方 PDF 链接（可选）</label>
           <input class="text-input" id="sourceUrl" type="url" placeholder="粘贴学校 / 考试官网的 PDF 链接">
           <div class="button-row">
             <button class="button" id="openPdfBtn" type="button">打开官方 PDF</button>
-            <button class="button teal" id="ocrBtn" type="button">提取原文</button>
+            <button class="button teal" id="extractPdfBtn" type="button">提取 PDF 文字</button>
           </div>
-          <div id="ocrStatus" class="status" role="status" aria-live="polite"></div>
-          <label class="field-label" for="ocrText">照片 / PDF 文字识别结果</label>
-          <textarea class="text-area" id="ocrText" placeholder="上传图片或 PDF 后点“提取原文”。识别内容可在这里手动校正，再复制给 ChatGPT 核对官方原文。"></textarea>
+          <div id="pdfStatus" class="status" role="status" aria-live="polite"></div>
+          <label class="field-label" for="pdfText">官方 PDF 可复制文字</label>
+          <textarea class="text-area" id="pdfText" placeholder="选择官方 PDF 后提取它自带的文字层。若 PDF 是扫描图片、没有文字层，网页会停止提取；请直接把 PDF 发到 ChatGPT 对话里核对。"></textarea>
           <div class="button-row">
-            <button class="button teal" id="copyPromptBtn" type="button">复制精读指令</button>
-            <button class="button" id="clearSourceBtn" type="button">清空原文</button>
+            <button class="button teal" id="copyPromptBtn" type="button">复制官方 PDF 检索指令</button>
+            <button class="button" id="clearSourceBtn" type="button">清空</button>
           </div>
-          <p class="helper">照片 OCR 只作底稿。请在当前 ChatGPT 对话同时上传原图，让我优先核对官方 PDF；识别不清处会标出来，不会凭空补原文。</p>
+          <p class="helper">这页不做图片 OCR。把照片发在当前对话后，我会先找官方 PDF 并核对发布机构、年份、科目和文章编号；没找到就先说明，不会用 OCR 代替原文。</p>
           <div class="divider"></div>
-          <div class="privacy-note"><span>◈</span><span>文件由你的浏览器本地读取。OCR 引擎从公共 CDN 加载；图片和 PDF 不会发给本项目服务器。生成的讲义内容只保存在当前浏览器。</span></div>
+          <div class="privacy-note"><span>◈</span><span>上传的官方 PDF 在浏览器本地解析，不会发给项目服务器。此页只提取 PDF 原有文字层；扫描版无文字层时会提示停止，不启动 OCR。</span></div>
         </div>
       </aside>
 
       <section class="main-column">
         <div class="workflow-strip" aria-label="使用步骤">
-          <div class="workflow-step"><b>1</b><span>上传照片，OCR 校正原文</span></div>
-          <div class="workflow-step"><b>2</b><span>把照片与精读指令发给 ChatGPT</span></div>
-          <div class="workflow-step"><b>3</b><span>导入讲义 JSON，打印为 PDF</span></div>
+          <div class="workflow-step"><b>1</b><span>在 ChatGPT 上传照片，先检索官方 PDF</span></div>
+          <div class="workflow-step"><b>2</b><span>以官方 PDF 核对原文、题目和答案</span></div>
+          <div class="workflow-step"><b>3</b><span>导入讲义 JSON，排版并保存 PDF</span></div>
         </div>
 
         <section class="panel editor-panel">
@@ -357,7 +365,7 @@
     const jsonEditor = $("#lessonJson");
     const sourceFiles = $("#sourceFiles");
     const previews = $("#previewList");
-    const ocrField = $("#ocrText");
+    const pdfTextField = $("#pdfText");
     let currentData = demo;
     let selectedFiles = [];
     let toastTimer;
@@ -517,6 +525,8 @@
       if (data.year) metaItems.push(`<span class="meta-chip">${escapeHtml(data.year)} 年</span>`);
       if (sourceUrl) metaItems.push(`<a class="meta-chip source-link" href="${escapeHtml(sourceUrl)}" target="_blank" rel="noopener">官方 PDF ↗</a>`);
       const meta = metaItems.join("");
+      const sourceProof = [data.sourcePublisher, data.sourceTitle, data.sourceVerificationNote].filter(Boolean);
+      const sourceProofHtml = sourceProof.length ? `<div class="source-verification"><strong>官方来源核验</strong>${sourceProof.map(escapeHtml).join(" · ")}</div>` : "";
       const logic = (data.logicChain || []).map((item) => `<span>${escapeHtml(item)}</span>`).join("");
       const evidenceMap = buildEvidenceMap(data);
       const paragraphs = (data.paragraphs || []).map((paragraph, i) => renderParagraph(paragraph, i, evidenceMap)).join("");
@@ -524,7 +534,7 @@
       output.innerHTML = `<header class="lesson-head">
         <div class="lesson-kicker">close reading · 逐句精读</div>
         <h2 class="lesson-title">${escapeHtml(data.title || "英语阅读精读讲义")}</h2>
-        <div class="lesson-meta">${meta || `<span class="meta-chip">待补充年份 / 来源</span>`}</div>
+        <div class="lesson-meta">${meta || `<span class="meta-chip">待补充年份 / 来源</span>`}</div>${sourceProofHtml}
       </header>
       ${data.centralIdea ? `<section class="overview"><div class="overview-label">全文主旨 / 逻辑</div><div class="overview-copy">${escapeHtml(data.centralIdea)}${logic ? `<div class="logic-chain">${logic}</div>` : ""}</div></section>` : ""}
       <section class="reading-body"><div class="section-title">Paragraph by paragraph · 原文逐句对照</div>${paragraphs || `<div class="empty-state">导入讲义 JSON 后，逐段原文会显示在这里。</div>`}</section>
@@ -550,22 +560,28 @@
       const helper = document.createElement("textarea"); helper.value = text; document.body.append(helper); helper.select(); document.execCommand("copy"); helper.remove(); return Promise.resolve();
     }
     function buildPrompt() {
-      const source = ocrField.value.trim();
+      const year = $("#examYear").value.trim();
+      const exam = $("#examPaper").value.trim();
+      const passage = $("#passageNo").value.trim();
       const url = $("#sourceUrl").value.trim();
-      return `请按我的考研英语阅读精读习惯处理这篇阅读。\n\n流程要求：\n1. 先根据我在当前对话上传的原图核对题目；优先查找并核对考试机构、学校或权威网站发布的官方 PDF。若官方 PDF 找不到，明确说明来源和不确定处，不能把 OCR 猜测当成原文。${url ? `\n官方 PDF 线索：${url}` : ""}\n2. 先概括全文中心和逻辑链，再逐段说明段意。\n3. 原文每一句都必须保留，按“英文原句 → 紧跟中文翻译”排版，绝不跳句或只写大意。长难句拆主干、连词、从句、非谓语和修饰关系。\n4. 每段整理重点单词、熟词生义和固定短语；在英文原句中把重点词标红，并把段落词组单独整理。\n5. 每道题翻译题干和每个选项，标出正确答案对应的原文句/短语，解释同义替换，并逐项说明干扰项错因。\n6. 最后总结作者态度、文章逻辑和可复用的解题方法。不要编造题目、答案或官方来源。\n\n请只输出可直接导入本网页的 JSON，不要加 Markdown 代码围栏。字段格式如下：\n{\n  "title":"文章标题", "exam":"考试科目 / 年份 / Text", "year":"年份", "sourcePdfUrl":"官方 PDF URL", "centralIdea":"全文主旨", "logicChain":["逻辑步骤"],\n  "paragraphs":[{"label":"P1","gist":"段意","sentences":[{"english":"完整英文原句","translation":"对应中文翻译","structure":"句子结构拆解","keyWords":["重点词"]}],"keyWords":[{"word":"词语","meaning":"词性、语境义/熟词生义"}],"keyPhrases":["短语 · 中文义"]}],\n  "questions":[{"number":1,"type":"题型","stem":"题干英文","stemTranslation":"题干翻译","options":[{"label":"A","text":"选项英文","translation":"选项翻译","reasoning":"该项判断依据"}],"answer":"B","evidence":{"paragraph":"P1","sentence":1,"quote":"原文中的逐字证据"},"analysis":"答案推理","trap":"干扰项陷阱"}],\n  "takeaway":"本篇方法总结"\n}\n\n照片 / PDF OCR 草稿如下，请以官方原文和原图复核，不要照抄明显识别错误：\n---\n${source || "（尚未提取文字；我会在当前对话另外上传原图。）"}\n---`;
+      const pdfText = pdfTextField.value.trim();
+      const details = [year && `年份：${year}`, exam && `科目：${exam}`, passage && `文章编号：${passage}`].filter(Boolean).join("\n");
+      return `请处理我在当前对话上传的英语阅读题照片。必须先联网检索并核对官方 PDF，再开始翻译和做题。\n\n题目线索：\n${details || "请从照片内容识别年份、科目和文章编号；识别不确定的地方先问我。"}${url ? `\n已有 PDF 链接线索：${url}` : ""}\n\n原文来源硬性要求：\n1. 先用照片辨认试卷线索，再联网搜索发布机构、考试机构或学校官方站点上的 PDF。打开 PDF 核对年份、科目、文章编号、文章标题/首句和题目选项，确认与照片是同一篇。\n2. 只把经过核验的官方 PDF 当作原文依据。照片只用于定位和比对；不要用 OCR 文本、搜索摘要、培训机构转载或记忆补写原文。下面若附有 PDF 文字层，也只能作为待核对材料，不能证明 PDF 来源官方。\n3. 在回答开头给出 PDF 标题、发布机构、官方 URL 和核验到的匹配信息。若找不到可核验的官方 PDF，或照片信息不足以唯一定位，先说明查找结果并向我索要年份/科目/文章编号/官方 PDF；不要退回用 OCR 继续制作讲义。\n\n确认官方 PDF 后，按我的阅读习惯讲解：\n1. 先讲全文中心和逻辑链，再逐段说明段意。\n2. 每段每句完整保留，严格按“英文原句 → 紧跟中文翻译”排版，不跳句、不删句、不只写大意。拆长难句的主干、连词、从句、非谓语和修饰关系。\n3. 每段整理重点词、熟词生义和固定短语；重点词要能在英文原句里标红，段落词组放旁栏。\n4. 每道题翻译题干和全部选项；正确答案要定位到官方 PDF 的具体段落、句子和原文短语，解释同义替换，并逐项说明干扰项错因。\n5. 总结作者态度、全文逻辑和可复用的解题方法。答案和原文必须能在已核验 PDF 中找到依据。\n\n仅当官方 PDF 已核验、且文章题目完整时，才输出可直接导入本网页的 JSON；不要加 Markdown 代码围栏。字段如下：\n{\n  "title":"文章标题", "exam":"考试科目 / 年份 / Text", "year":"年份", "sourcePdfUrl":"官方 PDF URL", "sourceTitle":"PDF 标题", "sourcePublisher":"发布机构", "sourceVerificationNote":"用哪些信息确认它与照片一致", "centralIdea":"全文主旨", "logicChain":["逻辑步骤"],\n  "paragraphs":[{"label":"P1","gist":"段意","sentences":[{"english":"官方 PDF 中的完整英文原句","translation":"对应中文翻译","structure":"句子结构拆解","keyWords":["重点词"]}],"keyWords":[{"word":"词语","meaning":"词性、语境义/熟词生义"}],"keyPhrases":["短语 · 中文义"]}],\n  "questions":[{"number":1,"type":"题型","stem":"题干英文","stemTranslation":"题干翻译","options":[{"label":"A","text":"选项英文","translation":"选项翻译","reasoning":"该项判断依据"}],"answer":"B","evidence":{"paragraph":"P1","sentence":1,"quote":"官方 PDF 中逐字对应的证据"},"analysis":"答案推理","trap":"干扰项陷阱"}],\n  "takeaway":"本篇方法总结"\n}\n\n以下文字若存在，是我从已选 PDF 中读取到的可复制文字层，仅供你与网上核验到的官方 PDF 对照；不要把它当作图片 OCR，也不要据此认定来源官方：\n---\n${pdfText || "（没有附 PDF 文字层；请直接在线检索并打开官方 PDF。）"}\n---`;
     }
     function updatePreviews(files) {
-      selectedFiles = Array.from(files || []);
+      const incoming = Array.from(files || []);
+      const rejected = incoming.some((file) => file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf"));
+      selectedFiles = incoming.filter((file) => file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"));
       previews.replaceChildren();
       selectedFiles.forEach((file, index) => {
         const item = document.createElement("div"); item.className = "preview-item";
-        const thumb = file.type.startsWith("image/") ? document.createElement("img") : Object.assign(document.createElement("div"), { className: "preview-file", textContent: "PDF" });
-        if (file.type.startsWith("image/")) thumb.src = URL.createObjectURL(file);
+        const thumb = Object.assign(document.createElement("div"), { className: "preview-file", textContent: "PDF" });
         const name = document.createElement("span"); name.textContent = `${file.name} · ${(file.size / 1024).toFixed(0)} KB`;
         const remove = document.createElement("button"); remove.type = "button"; remove.setAttribute("aria-label", `移除 ${file.name}`); remove.textContent = "×";
         remove.addEventListener("click", () => { selectedFiles.splice(index, 1); updatePreviews(selectedFiles); });
         item.append(thumb, name, remove); previews.append(item);
       });
+      if (rejected) setStatus($("#pdfStatus"), "此处只接收官方 PDF。题目照片请直接发到当前 ChatGPT 对话，供我识别线索并查找官方原件。", true);
       if (selectedFiles.length) showToast(`已添加 ${selectedFiles.length} 个文件`);
     }
     function loadScript(src) {
@@ -574,14 +590,9 @@
         if (existing?.dataset.loaded === "true") return resolve();
         if (existing) { existing.addEventListener("load", resolve, { once: true }); existing.addEventListener("error", reject, { once: true }); return; }
         const script = document.createElement("script"); script.src = src; script.async = true;
-        script.onload = () => { script.dataset.loaded = "true"; resolve(); }; script.onerror = () => reject(new Error("识别组件加载失败，请检查网络后重试。"));
+        script.onload = () => { script.dataset.loaded = "true"; resolve(); }; script.onerror = () => reject(new Error("PDF 解析组件加载失败，请检查网络后重试。"));
         document.head.append(script);
       });
-    }
-    async function ensureTesseract() {
-      if (window.Tesseract) return window.Tesseract;
-      await loadScript("https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js");
-      return window.Tesseract;
     }
     async function extractPdf(file, report) {
       if (!window.pdfjsLib) {
@@ -590,6 +601,7 @@
       }
       const pdf = await window.pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
       const pages = [];
+      const scannedPages = [];
       for (let pageNo = 1; pageNo <= pdf.numPages; pageNo++) {
         report(`读取 PDF 第 ${pageNo}/${pdf.numPages} 页…`);
         const page = await pdf.getPage(pageNo);
@@ -602,37 +614,27 @@
           lines.get(y).push({ x: item.transform?.[4] || 0, text: item.str.trim() });
         });
         const text = [...lines.entries()].sort((a, b) => b[0] - a[0]).map(([, row]) => row.sort((a, b) => a.x - b.x).map((item) => item.text).join(" ")).join("\n");
-        if (text.trim().length > 25) pages.push(`【PDF 第 ${pageNo} 页】\n${text}`);
-        else {
-          const tesseract = await ensureTesseract();
-          const viewport = page.getViewport({ scale: 1.65 });
-          const canvas = document.createElement("canvas"); canvas.width = viewport.width; canvas.height = viewport.height;
-          await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
-          const result = await tesseract.recognize(canvas, "eng+chi_sim", { logger: (m) => { if (m.status === "recognizing text") report(`PDF 扫描页 OCR ${pageNo}/${pdf.numPages}：${Math.round((m.progress || 0) * 100)}%`); } });
-          pages.push(`【PDF 第 ${pageNo} 页 · OCR】\n${result.data.text}`);
-        }
+        if (text.trim()) pages.push(`【PDF 第 ${pageNo} 页 · 原生文字层】\n${text}`);
+        else scannedPages.push(pageNo);
       }
+      if (!pages.length) throw new Error("这个 PDF 没有可复制的文字层，页面不会用 OCR 猜原文。请把 PDF 上传到当前 ChatGPT 对话，或换一份可搜索文字的官方 PDF。");
+      if (scannedPages.length) pages.push(`【核对提醒】第 ${scannedPages.join("、")} 页没有可复制文字层。不要用 OCR 补写这些页面；请在当前 ChatGPT 对话直接上传 PDF 进行视觉核对。`);
       return pages.join("\n\n");
     }
-    async function runOcr() {
-      const status = $("#ocrStatus"); clearStatus(status);
-      if (!selectedFiles.length) { setStatus(status, "先选择照片或 PDF。", true); return; }
-      const button = $("#ocrBtn"); button.disabled = true; button.textContent = "识别中…";
+    async function extractOfficialPdfText() {
+      const status = $("#pdfStatus"); clearStatus(status);
+      if (!selectedFiles.length) { setStatus(status, "先选择已确认的官方 PDF。", true); return; }
+      const button = $("#extractPdfBtn"); button.disabled = true; button.textContent = "读取中…";
       const chunks = [];
       const report = (message) => setStatus(status, message);
       try {
         for (let i = 0; i < selectedFiles.length; i++) {
-          const file = selectedFiles[i]; report(`处理 ${i + 1}/${selectedFiles.length}：${file.name}`);
-          if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) chunks.push(await extractPdf(file, report));
-          else {
-            const tesseract = await ensureTesseract();
-            const result = await tesseract.recognize(file, "eng+chi_sim", { logger: (m) => { if (m.status === "recognizing text") report(`图片 OCR ${i + 1}/${selectedFiles.length}：${Math.round((m.progress || 0) * 100)}%`); } });
-            chunks.push(`【${file.name}】\n${result.data.text}`);
-          }
+          const file = selectedFiles[i]; report(`读取官方 PDF ${i + 1}/${selectedFiles.length}：${file.name}`);
+          chunks.push(await extractPdf(file, report));
         }
-        ocrField.value = chunks.join("\n\n"); setStatus(status, "识别完成。请先校正明显错字，再用“复制精读指令”交给 ChatGPT 核对。照片仍只在本机浏览器处理。");
-      } catch (error) { setStatus(status, `识别没有完成：${error.message}`, true); }
-      finally { button.disabled = false; button.textContent = "提取原文"; }
+        pdfTextField.value = chunks.join("\n\n"); setStatus(status, "PDF 文字层已提取。请仍让 ChatGPT 在线核验 PDF 发布机构和试卷信息；本地文字层本身不证明文件官方。");
+      } catch (error) { setStatus(status, `没有提取：${error.message}`, true); }
+      finally { button.disabled = false; button.textContent = "提取 PDF 文字"; }
     }
 
     $("#renderBtn").addEventListener("click", applyEditor);
@@ -648,7 +650,7 @@
       event.target.value = "";
     });
     $("#sourceFiles").addEventListener("change", (event) => updatePreviews(event.target.files));
-    $("#ocrBtn").addEventListener("click", runOcr);
+    $("#extractPdfBtn").addEventListener("click", extractOfficialPdfText);
     $("#openPdfBtn").addEventListener("click", () => {
       const url = safeUrl($("#sourceUrl").value.trim());
       if (!url) return showToast("先粘贴有效的官方 PDF 链接");
@@ -660,10 +662,10 @@
       renderLesson(currentData);
     });
     $("#copyPromptBtn").addEventListener("click", async () => {
-      try { await copyText(buildPrompt()); showToast("精读指令已复制；记得在当前对话上传原图"); }
-      catch { showToast("复制失败，请手动选择并复制 OCR 文本"); }
+      try { await copyText(buildPrompt()); showToast("官方 PDF 检索指令已复制；在当前对话上传题目照片"); }
+      catch { showToast("复制失败，请检查浏览器剪贴板权限"); }
     });
-    $("#clearSourceBtn").addEventListener("click", () => { ocrField.value = ""; updatePreviews([]); clearStatus($("#ocrStatus")); sourceFiles.value = ""; });
+    $("#clearSourceBtn").addEventListener("click", () => { pdfTextField.value = ""; updatePreviews([]); clearStatus($("#pdfStatus")); sourceFiles.value = ""; });
     $("#dropZone").addEventListener("dragover", (event) => { event.preventDefault(); event.currentTarget.classList.add("dragover"); });
     $("#dropZone").addEventListener("dragleave", (event) => event.currentTarget.classList.remove("dragover"));
     $("#dropZone").addEventListener("drop", (event) => { event.preventDefault(); event.currentTarget.classList.remove("dragover"); updatePreviews(event.dataTransfer.files); });
