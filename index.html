@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102d35">
+  <title>逐句精读 · 英语阅读讲义</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #193238;
+      --muted: #718187;
+      --teal: #167a70;
+      --teal-deep: #105c58;
+      --mint: #e4f3ee;
+      --paper: #fbfaf6;
+      --paper-deep: #f1efe7;
+      --line: #dce3df;
+      --red: #cf3e37;
+      --red-soft: #fff0ed;
+      --gold: #f4d979;
+      --green: #28735a;
+      --shadow: 0 18px 55px rgba(21, 52, 55, .09);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: #edf2ef; }
+    button, input, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .app-shell { min-height: 100vh; }
+    .topbar {
+      color: #eff8f4; padding: 18px clamp(18px, 4vw, 54px); display: flex;
+      align-items: center; justify-content: space-between; gap: 20px;
+      background: linear-gradient(112deg, #102d35 0%, #17494b 58%, #1b665d 100%);
+      position: relative; overflow: hidden;
+    }
+    .topbar::after { content: ""; position: absolute; width: 360px; height: 360px; right: 5%; top: -270px; border: 1px solid rgba(221,247,232,.17); border-radius: 50%; box-shadow: 0 0 0 35px rgba(221,247,232,.035), 0 0 0 70px rgba(221,247,232,.025); }
+    .brand { display: flex; align-items: center; gap: 12px; position: relative; z-index: 1; }
+    .brand-mark { width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid rgba(219,244,232,.36); border-radius: 13px; color: #bdebd7; font-family: Georgia, serif; font-size: 20px; transform: rotate(-5deg); }
+    .brand-name { font-weight: 750; letter-spacing: .08em; font-size: 13px; }
+    .brand-sub { font-size: 11px; color: #b6cbc6; margin-top: 3px; letter-spacing: .04em; }
+    .top-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 9px; position: relative; z-index: 1; }
+    .top-actions button { border: 1px solid rgba(227,243,236,.25); background: rgba(238,250,244,.09); color: #f3faf7; border-radius: 10px; padding: 10px 13px; transition: .18s ease; }
+    .top-actions button:hover { background: rgba(238,250,244,.19); transform: translateY(-1px); }
+    .top-actions .primary { background: #d9f2e5; color: #16453f; border-color: #d9f2e5; font-weight: 700; }
+    .hero { max-width: 1380px; margin: 0 auto; padding: 36px clamp(16px, 4vw, 52px) 22px; display: flex; align-items: end; justify-content: space-between; gap: 24px; }
+    .eyebrow { color: var(--teal); font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; margin-bottom: 10px; }
+    h1 { margin: 0; font-size: clamp(27px, 4vw, 42px); line-height: 1.15; letter-spacing: -.045em; color: #16343b; }
+    .hero p { max-width: 700px; color: #65777a; line-height: 1.75; margin: 12px 0 0; font-size: 14px; }
+    .progress-pill { white-space: nowrap; border: 1px solid #d8e4df; background: rgba(255,255,255,.7); padding: 10px 13px; border-radius: 999px; color: #5e7373; font-size: 12px; }
+    .progress-pill strong { color: var(--teal); margin-right: 7px; }
+    .workspace { max-width: 1380px; padding: 0 clamp(16px, 4vw, 52px) 48px; margin: 0 auto; display: grid; grid-template-columns: minmax(285px, 350px) minmax(0, 1fr); gap: 24px; align-items: start; }
+    .panel { background: #fff; border: 1px solid #e0e7e2; border-radius: 18px; box-shadow: var(--shadow); }
+    .source-panel { position: sticky; top: 16px; overflow: hidden; }
+    .panel-head { padding: 19px 20px 14px; border-bottom: 1px solid #edf0ec; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .panel-head h2 { font-size: 14px; margin: 0; letter-spacing: -.01em; }
+    .step { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: #79908b; }
+    .source-body { padding: 17px 20px 20px; }
+    .upload-zone { min-height: 145px; border: 1.5px dashed #a9c9bb; background: linear-gradient(145deg, #f3faf5, #eff6f3); border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 16px; color: #4b6e69; transition: .18s ease; }
+    .upload-zone.dragover { border-color: var(--teal); background: #e4f6ed; transform: scale(1.01); }
+    .upload-icon { width: 35px; height: 35px; border-radius: 11px; background: #d8eee3; display: grid; place-items: center; color: var(--teal); font-size: 18px; margin-bottom: 9px; }
+    .upload-zone strong { font-size: 13px; color: #244d49; }
+    .upload-zone small { font-size: 11px; margin-top: 6px; color: #7b918c; line-height: 1.55; }
+    .file-picker { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+    .field-label { display: block; font-size: 11px; font-weight: 750; color: #486164; margin: 17px 0 7px; }
+    .text-input, .text-area { width: 100%; border: 1px solid #dbe4df; background: #fbfcfa; border-radius: 10px; padding: 10px 11px; color: #263e42; outline: none; transition: border .15s, box-shadow .15s; }
+    .text-input { font-size: 12px; }
+    .text-area { min-height: 136px; resize: vertical; font-size: 12px; line-height: 1.65; }
+    .text-input:focus, .text-area:focus { border-color: #6aa997; box-shadow: 0 0 0 3px rgba(53,139,116,.11); }
+    .button-row { display: flex; gap: 8px; margin-top: 10px; }
+    .button { border: 1px solid #d9e3de; background: #fff; color: #365557; padding: 9px 11px; border-radius: 10px; font-size: 11px; font-weight: 700; transition: .15s ease; }
+    .button:hover { border-color: #91baaa; background: #f5fbf7; }
+    .button.teal { background: var(--teal); border-color: var(--teal); color: #fff; }
+    .button.teal:hover { background: var(--teal-deep); }
+    .button.ghost { background: transparent; }
+    .button.small { padding: 7px 9px; font-size: 10px; }
+    .button-row .button { flex: 1; }
+    .helper { color: #849392; font-size: 10px; line-height: 1.55; margin: 9px 0 0; }
+    .status { display: none; padding: 9px 10px; border-radius: 9px; background: #edf7f2; color: #36705b; font-size: 11px; line-height: 1.55; margin-top: 10px; }
+    .status.show { display: block; }
+    .status.error { background: #fff0ed; color: #a94138; }
+    .preview-list { display: grid; gap: 8px; margin-top: 10px; }
+    .preview-item { border: 1px solid #e3e9e5; border-radius: 10px; padding: 8px; display: grid; grid-template-columns: 44px minmax(0,1fr) auto; align-items: center; gap: 9px; font-size: 10px; color: #607577; }
+    .preview-item img { width: 44px; height: 38px; object-fit: cover; border-radius: 6px; background: #f2f4f2; }
+    .preview-file { width: 44px; height: 38px; border-radius: 6px; background: #eff5f1; display: grid; place-items: center; color: var(--teal); font-weight: 800; }
+    .preview-item button { border: 0; background: transparent; color: #91a09e; font-size: 16px; }
+    .divider { height: 1px; background: #edf0ec; margin: 19px 0 4px; }
+    .privacy-note { display: flex; gap: 8px; align-items: flex-start; margin-top: 15px; background: #f7f8f4; border-radius: 10px; padding: 10px; color: #71827f; font-size: 10px; line-height: 1.55; }
+    .privacy-note span:first-child { color: var(--teal); }
+    .main-column { min-width: 0; }
+    .workflow-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-bottom: 16px; }
+    .workflow-step { border: 1px solid #dfe8e3; background: rgba(255,255,255,.72); border-radius: 12px; padding: 11px 12px; display: flex; gap: 9px; align-items: center; color: #6d8180; font-size: 10px; line-height: 1.4; }
+    .workflow-step b { width: 21px; height: 21px; flex: 0 0 21px; display: grid; place-items: center; border-radius: 50%; background: #e0f1e8; color: #257367; font-size: 10px; }
+    .editor-panel { margin-bottom: 17px; overflow: hidden; }
+    .editor-panel .panel-head { padding: 14px 17px; }
+    .editor-panel .panel-head h2 { font-size: 12px; }
+    .editor-panel .panel-body { padding: 13px 17px 16px; }
+    .editor-panel .text-area { min-height: 115px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 10px; }
+    .editor-toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 9px; margin-top: 10px; }
+    .editor-toolbar span { color: #879694; font-size: 10px; }
+    .editor-toolbar .button-row { margin: 0; }
+    .lesson { overflow: hidden; background: var(--paper); border-color: #e5e5dc; }
+    .lesson-head { padding: clamp(22px, 4vw, 42px) clamp(20px, 4.5vw, 48px) 22px; border-bottom: 1px solid #e8e6dc; background: radial-gradient(ellipse at 90% 0%, rgba(54,136,116,.1), transparent 38%), linear-gradient(120deg, #fffefa, #f8f8f1); }
+    .lesson-kicker { display: flex; align-items: center; gap: 8px; color: #6e8a80; font-weight: 800; font-size: 10px; letter-spacing: .15em; text-transform: uppercase; }
+    .lesson-kicker::before { content: ""; width: 19px; height: 2px; background: #439784; }
+    .lesson-title { font-family: Georgia, "Songti SC", "Noto Serif SC", serif; font-weight: 650; color: #1d393d; line-height: 1.3; letter-spacing: -.025em; font-size: clamp(24px, 3vw, 34px); margin: 12px 0 12px; }
+    .lesson-meta { display: flex; flex-wrap: wrap; gap: 7px; }
+    .meta-chip { border: 1px solid #dfe7df; color: #617674; background: rgba(255,255,255,.65); padding: 5px 9px; border-radius: 999px; font-size: 9px; }
+    .source-link { color: #15766b; text-decoration: underline; text-underline-offset: 2px; }
+    .overview { padding: 20px clamp(20px, 4.5vw, 48px); border-bottom: 1px solid #ece9de; display: grid; grid-template-columns: 140px 1fr; gap: 16px; align-items: start; }
+    .overview-label { color: #4e8176; font-size: 10px; font-weight: 850; letter-spacing: .12em; padding-top: 3px; }
+    .overview-copy { font-family: Georgia, "Songti SC", serif; line-height: 1.85; color: #405a5b; font-size: 13px; }
+    .logic-chain { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .logic-chain span { font-size: 9px; color: #4b746d; background: #e9f2eb; padding: 5px 8px; border-radius: 6px; }
+    .reading-body { padding: 19px clamp(16px, 3vw, 32px) 28px clamp(20px, 4.5vw, 48px); }
+    .section-title { display: flex; align-items: center; gap: 10px; color: #59726e; font-size: 10px; font-weight: 850; letter-spacing: .14em; text-transform: uppercase; margin: 3px 0 17px; }
+    .section-title::after { content: ""; height: 1px; flex: 1; background: #e4e5dc; }
+    .paragraph-grid { display: grid; grid-template-columns: minmax(0, 1fr) 208px; gap: 22px; align-items: start; padding: 19px 0 22px; border-bottom: 1px solid #e7e6de; }
+    .paragraph-grid:last-child { border-bottom: 0; }
+    .paragraph-main { min-width: 0; }
+    .paragraph-heading { display: flex; align-items: baseline; gap: 9px; margin-bottom: 10px; }
+    .paragraph-label { font-family: Georgia, serif; font-weight: 700; color: var(--teal); font-size: 18px; }
+    .paragraph-gist { color: #84918c; font-size: 10px; line-height: 1.55; }
+    .sentence { padding: 8px 0 12px; scroll-margin-top: 25px; }
+    .sentence-en { font-family: Georgia, "Times New Roman", serif; font-size: 16px; line-height: 2.15; letter-spacing: .012em; color: #213a3e; }
+    .sentence-zh { border-left: 2px solid #a8cbbb; padding: 4px 0 4px 11px; margin: 5px 0 0 1px; color: #64766f; line-height: 1.75; font-size: 12px; }
+    .structure { margin: 7px 0 2px 13px; color: #74837e; font-size: 10px; line-height: 1.6; }
+    .structure summary { cursor: pointer; color: #498277; font-weight: 750; }
+    .structure p { margin: 5px 0; }
+    .vocab { color: var(--red); font-weight: 750; border-bottom: 1px dotted rgba(207,62,55,.45); }
+    mark.answer-evidence { background: linear-gradient(transparent 12%, rgba(248,217,121,.85) 12%, rgba(248,217,121,.85) 91%, transparent 91%); color: inherit; padding: 1px 2px; border-radius: 2px; scroll-margin-top: 20px; }
+    .evidence-tag { display: inline-block; vertical-align: middle; margin: 0 0 0 5px; padding: 2px 5px; border-radius: 5px; background: #f5e7aa; color: #725918; font: 800 8px/1.2 var(--font, sans-serif); white-space: nowrap; }
+    .paragraph-aside { border-left: 1px solid #dbe5dc; padding: 2px 0 2px 14px; }
+    .aside-label { color: #638078; font-size: 9px; font-weight: 850; letter-spacing: .12em; margin-bottom: 9px; }
+    .word-card { background: rgba(255,255,255,.68); border: 1px solid #e3e8df; border-radius: 9px; padding: 8px 9px; margin-bottom: 7px; }
+    .word-card strong { display: block; color: var(--red); font: 700 11px Georgia, serif; margin-bottom: 3px; }
+    .word-card span { color: #687a74; font-size: 9px; line-height: 1.5; display: block; }
+    .phrase-list { margin-top: 11px; }
+    .phrase-list .aside-label { margin-bottom: 6px; }
+    .phrase-item { display: block; font: 10px/1.6 Georgia, serif; color: #307368; padding: 4px 0; border-bottom: 1px dashed #dce5db; }
+    .aside-empty { font-size: 9px; line-height: 1.6; color: #a0aba5; }
+    .question-section { padding: 25px clamp(20px, 4.5vw, 48px) 34px; background: #f4f4ed; border-top: 1px solid #e4e5dc; }
+    .question-card { background: #fffefa; border: 1px solid #e1e5da; border-radius: 13px; padding: 15px 16px; margin: 12px 0; box-shadow: 0 5px 16px rgba(27,54,48,.035); scroll-margin-top: 20px; }
+    .question-top { display: flex; align-items: center; justify-content: space-between; gap: 9px; margin-bottom: 9px; }
+    .question-no { font-weight: 850; color: #2d665d; font-size: 11px; letter-spacing: .04em; }
+    .question-type { font-size: 9px; color: #82918b; }
+    .question-stem { font-family: Georgia, "Songti SC", serif; font-size: 13px; line-height: 1.7; color: #304a4a; }
+    .question-stem small { display: block; font-family: inherit; color: #89948d; margin-top: 3px; font-size: 10px; }
+    .options { display: grid; gap: 6px; margin: 11px 0; }
+    .option { display: grid; grid-template-columns: 20px 1fr; gap: 7px; align-items: start; padding: 7px 9px; border-radius: 8px; color: #6b7a75; font-size: 10px; line-height: 1.55; }
+    .option-label { font-weight: 850; color: #7d8a84; }
+    .option.correct { background: #e9f4ec; color: #285946; border: 1px solid #d5e9da; }
+    .option.correct .option-label { color: #28735a; }
+    .option-zh { display: block; color: #87928a; margin-top: 2px; }
+    .question-analysis { padding: 9px 10px; background: #f6f6ef; border-radius: 8px; color: #667871; font-size: 10px; line-height: 1.65; }
+    .question-evidence { margin-top: 9px; border-left: 2px solid #d9b74e; padding-left: 9px; color: #626e61; font-family: Georgia, "Songti SC", serif; font-size: 10px; line-height: 1.7; }
+    .question-evidence button { color: #41766b; background: transparent; border: 0; padding: 0; font-size: 9px; font-family: var(--font, sans-serif); text-decoration: underline; text-underline-offset: 2px; }
+    .takeaway { padding: 18px clamp(20px, 4.5vw, 48px) 26px; border-top: 1px solid #e7e6de; }
+    .takeaway-title { color: #4e8176; font-size: 10px; font-weight: 850; letter-spacing: .12em; margin-bottom: 8px; }
+    .takeaway-copy { color: #566e69; font-family: Georgia, "Songti SC", serif; font-size: 12px; line-height: 1.75; }
+    .empty-state { padding: 30px; text-align: center; color: #879793; font-size: 12px; }
+    .toast { position: fixed; z-index: 30; left: 50%; bottom: 24px; transform: translate(-50%, 15px); opacity: 0; pointer-events: none; background: #173b3d; color: #effaf4; padding: 11px 15px; border-radius: 10px; box-shadow: 0 10px 30px rgba(17,47,47,.2); font-size: 11px; transition: .22s ease; }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .hidden { display: none !important; }
+    @media (max-width: 940px) {
+      .workspace { grid-template-columns: 1fr; }
+      .source-panel { position: static; }
+      .source-body { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+      .upload-zone, .preview-list, .divider, .privacy-note { grid-column: 1 / -1; }
+      .source-body .field-label:first-of-type { margin-top: 15px; }
+    }
+    @media (max-width: 640px) {
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .top-actions { justify-content: flex-start; }
+      .hero { align-items: flex-start; flex-direction: column; padding-top: 27px; }
+      .workspace { padding-bottom: 24px; gap: 14px; }
+      .source-body { display: block; }
+      .workflow-strip { grid-template-columns: 1fr; }
+      .workflow-step { padding: 9px 11px; }
+      .paragraph-grid { grid-template-columns: 1fr; gap: 11px; }
+      .paragraph-aside { border-left: 0; border-top: 1px dashed #d4e0d6; padding: 11px 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+      .paragraph-aside > .aside-label { grid-column: 1 / -1; margin: 0; }
+      .paragraph-aside .phrase-list { grid-column: 1 / -1; margin-top: 2px; }
+      .overview { grid-template-columns: 1fr; gap: 7px; }
+      .sentence-en { font-size: 15px; line-height: 2.05; }
+      .lesson-head { padding-top: 27px; }
+      .top-actions button { padding: 8px 10px; font-size: 10px; }
+    }
+    @media print {
+      @page { size: A4 portrait; margin: 14mm 13mm 14mm; }
+      body { background: #fff; color: #1a3032; font-size: 10pt; }
+      .topbar, .hero, .source-panel, .workflow-strip, .editor-panel, .screen-only, .toast { display: none !important; }
+      .workspace { display: block; max-width: none; padding: 0; margin: 0; }
+      .lesson, .panel { box-shadow: none; border: 0; border-radius: 0; background: #fff; overflow: visible; }
+      .lesson-head { padding: 0 0 8mm; background: #fff; border-bottom: 1px solid #b9c8bf; }
+      .lesson-title { font-size: 23pt; }
+      .overview { padding: 5mm 0; grid-template-columns: 28mm 1fr; }
+      .reading-body { padding: 4mm 0 6mm; }
+      .paragraph-grid { grid-template-columns: minmax(0, 1fr) 42mm; gap: 6mm; padding: 5mm 0; break-inside: avoid; }
+      .paragraph-aside { padding-left: 3mm; }
+      .sentence { padding: 1.5mm 0 2mm; break-inside: avoid; }
+      .sentence-en { font-size: 11pt; line-height: 2.05; }
+      .sentence-zh { font-size: 9pt; }
+      .question-section { padding: 6mm 0; background: #fff; }
+      .question-card { box-shadow: none; break-inside: avoid; padding: 4mm; margin: 3mm 0; }
+      .takeaway { padding: 4mm 0; }
+      .structure:not([open]) { display: none; }
+      .paragraph-aside, .question-card, .meta-chip, .option.correct { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .answer-evidence, .vocab { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      a { color: #176e64 !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">读</div>
+        <div><div class="brand-name">READING STUDIO</div><div class="brand-sub">逐句精读 · 阅读讲义排版器</div></div>
+      </div>
+      <div class="top-actions">
+        <button id="loadDemoBtn" type="button">看示例</button>
+        <button id="importBtn" type="button">导入讲义 JSON</button>
+        <button id="exportBtn" type="button">导出 JSON</button>
+        <button class="primary" id="printBtn" type="button">打印 / 保存 PDF</button>
+        <input id="jsonFile" type="file" accept="application/json,.json" class="hidden">
+      </div>
+    </header>
+
+    <section class="hero">
+      <div>
+        <div class="eyebrow">考研英语 · 精读工作台</div>
+        <h1>原文读得清，证据看得见。</h1>
+        <p>上传阅读题照片或官方 PDF，在浏览器里提取原文；把精读讲解导入后，生成英文逐句排布、中文紧跟原句、重点词标红、段落词组侧注、题目证据高亮的讲义。</p>
+      </div>
+      <div class="progress-pill"><strong>01 — 03</strong>原文 → 精读 → 讲义</div>
+    </section>
+
+    <main class="workspace">
+      <aside class="panel source-panel">
+        <div class="panel-head"><h2>原文与官方来源</h2><span class="step">SOURCE</span></div>
+        <div class="source-body">
+          <label class="upload-zone" id="dropZone" for="sourceFiles">
+            <span class="upload-icon">＋</span>
+            <strong>拍照上传，或选择 PDF</strong>
+            <small>支持图片和 PDF，可多选<br>照片留在当前浏览器，不会上传到本项目服务器</small>
+          </label>
+          <input id="sourceFiles" class="file-picker" type="file" accept="image/*,application/pdf,.pdf" multiple>
+          <div id="previewList" class="preview-list"></div>
+
+          <label class="field-label" for="sourceUrl">官方 PDF 链接（可选）</label>
+          <input class="text-input" id="sourceUrl" type="url" placeholder="粘贴学校 / 考试官网的 PDF 链接">
+          <div class="button-row">
+            <button class="button" id="openPdfBtn" type="button">打开官方 PDF</button>
+            <button class="button teal" id="ocrBtn" type="button">提取原文</button>
+          </div>
+          <div id="ocrStatus" class="status" role="status" aria-live="polite"></div>
+          <label class="field-label" for="ocrText">照片 / PDF 文字识别结果</label>
+          <textarea class="text-area" id="ocrText" placeholder="上传图片或 PDF 后点“提取原文”。识别内容可在这里手动校正，再复制给 ChatGPT 核对官方原文。"></textarea>
+          <div class="button-row">
+            <button class="button teal" id="copyPromptBtn" type="button">复制精读指令</button>
+            <button class="button" id="clearSourceBtn" type="button">清空原文</button>
+          </div>
+          <p class="helper">照片 OCR 只作底稿。请在当前 ChatGPT 对话同时上传原图，让我优先核对官方 PDF；识别不清处会标出来，不会凭空补原文。</p>
+          <div class="divider"></div>
+          <div class="privacy-note"><span>◈</span><span>文件由你的浏览器本地读取。OCR 引擎从公共 CDN 加载；图片和 PDF 不会发给本项目服务器。生成的讲义内容只保存在当前浏览器。</span></div>
+        </div>
+      </aside>
+
+      <section class="main-column">
+        <div class="workflow-strip" aria-label="使用步骤">
+          <div class="workflow-step"><b>1</b><span>上传照片，OCR 校正原文</span></div>
+          <div class="workflow-step"><b>2</b><span>把照片与精读指令发给 ChatGPT</span></div>
+          <div class="workflow-step"><b>3</b><span>导入讲义 JSON，打印为 PDF</span></div>
+        </div>
+
+        <section class="panel editor-panel">
+          <div class="panel-head"><h2>讲义数据 · 可直接编辑或导入 ChatGPT 返回的 JSON</h2><span class="step">EDIT</span></div>
+          <div class="panel-body">
+            <textarea class="text-area" id="lessonJson" spellcheck="false" aria-label="讲义 JSON 编辑器"></textarea>
+            <div class="editor-toolbar">
+              <span>JSON 字段说明见仓库 README；保存后会自动刷新下方排版。</span>
+              <div class="button-row"><button class="button small" id="formatBtn" type="button">整理 JSON</button><button class="button teal small" id="renderBtn" type="button">应用并排版</button></div>
+            </div>
+            <div id="jsonStatus" class="status" role="status" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <article class="panel lesson" id="lessonOutput" aria-live="polite"></article>
+      </section>
+    </main>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const demo = {
+      title: "阅读示例：从信息到判断",
+      exam: "排版示例 · 非真题",
+      year: "",
+      sourcePdfUrl: "",
+      centralIdea: "这段演示展示讲义版式：作者先承认数据工具能让工作更快，随后指出速度并不等于判断，最后强调人仍要解释证据、承担结论。",
+      logicChain: ["工具提高速度", "速度不等于判断", "人负责解释证据"],
+      paragraphs: [
+        {
+          label: "P1",
+          gist: "提出常见看法：数字工具提高了处理信息的速度。",
+          sentences: [
+            { english: "Digital tools can sort thousands of records in seconds, a task that once occupied an entire afternoon.", translation: "数字工具能在几秒钟内整理数千条记录；这项工作过去要占用整整一个下午。", structure: "主干：Digital tools can sort thousands of records。后面的 in seconds 表示时间；a task 是前面整件事的同位语，that once occupied... 是修饰 task 的定语从句。", keyWords: ["records", "occupied"] },
+            { english: "That speed is useful, but it does not tell us which records matter or why.", translation: "这种速度确实有用，但它并不能告诉我们哪些记录重要、原因又是什么。", structure: "but 连接转折并列句；第二个分句的宾语是 which records matter or why。转折后面才是作者要推进的观点。", keyWords: ["matter"] }
+          ],
+          keyWords: [
+            { word: "record", meaning: "n. 记录；熟词生义：数据条目" },
+            { word: "occupy", meaning: "v. 占用（时间、空间）；使忙于" },
+            { word: "matter", meaning: "v. 要紧，有重要性" }
+          ],
+          keyPhrases: ["sort records 整理记录", "in seconds 几秒钟内", "tell A from B 区分 A 与 B"]
+        },
+        {
+          label: "P2",
+          gist: "用转折句点明全文重点：分析工具给出相关性，人仍要判断其意义。",
+          sentences: [
+            { english: "A useful analysis begins when a reader asks what the pattern leaves out.", translation: "当读者开始追问这种模式遗漏了什么时，真正有用的分析才开始。", structure: "主干：A useful analysis begins。when 引导时间状语从句；从句里 what the pattern leaves out 作 asks 的宾语。", keyWords: ["pattern", "leaves out"] },
+            { english: "The software can point to a correlation; only a person can decide whether it supports the claim being made.", translation: "软件可以指出相关性；但只有人能判断它是否支持当前提出的论点。", structure: "分号连接两个完整分句。only a person 强调判断主体；whether 引导宾语从句，being made 是现在分词短语，后置修饰 claim。", keyWords: ["correlation", "supports", "claim"] }
+          ],
+          keyWords: [
+            { word: "pattern", meaning: "n. 模式，规律" },
+            { word: "leave out", meaning: "遗漏，排除在外" },
+            { word: "correlation", meaning: "n. 相关性；不等于因果关系" },
+            { word: "claim", meaning: "n. 论点，主张" }
+          ],
+          keyPhrases: ["ask what... 追问……是什么", "point to 指向，表明", "support a claim 支持一个论点"]
+        }
+      ],
+      questions: [
+        {
+          number: 1,
+          type: "主旨 / 作者观点",
+          stem: "What is the passage mainly about?",
+          stemTranslation: "这段文字主要讨论什么？",
+          options: [
+            { label: "A", text: "Why software should replace human judgment.", translation: "为什么软件应该取代人的判断。", reasoning: "原文没有主张取代人的判断，反而强调只有人能判断论点是否成立。" },
+            { label: "B", text: "Why faster analysis still requires human interpretation.", translation: "为什么更快的分析仍然需要人的解读。", reasoning: "概括全文：工具提高速度，但意义和证据仍要由人判断。" },
+            { label: "C", text: "How to collect more digital records.", translation: "如何收集更多数字记录。", reasoning: "文章没有讨论收集记录的方法，属于话题范围偏移。" },
+            { label: "D", text: "How correlations prove a claim.", translation: "相关性如何证明论点。", reasoning: "作者提醒相关性本身不足以证明论点，D 把作者的提醒说反了。" }
+          ],
+          answer: "B",
+          evidence: { paragraph: "P2", sentence: 2, quote: "only a person can decide whether it supports the claim being made" },
+          analysis: "全文逻辑是“效率提升 → 速度不等于判断 → 人负责解释证据”。B 同时抓住工具与人的分工，范围和方向都吻合。",
+          trap: "注意作者不是反对软件，而是在区分“指出相关性”和“判断论点是否成立”。"
+        }
+      ],
+      takeaway: "做主旨题时，把转折之后的作者判断和段落之间的逻辑链连起来；不要只抓开头提到的工具或数据。"
+    };
+
+    const $ = (selector) => document.querySelector(selector);
+    const output = $("#lessonOutput");
+    const jsonEditor = $("#lessonJson");
+    const sourceFiles = $("#sourceFiles");
+    const previews = $("#previewList");
+    const ocrField = $("#ocrText");
+    let currentData = demo;
+    let selectedFiles = [];
+    let toastTimer;
+
+    function escapeHtml(value = "") {
+      return String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+    }
+    function safeUrl(value = "") {
+      try { const url = new URL(value); return ["https:", "http:"].includes(url.protocol) ? url.href : ""; } catch { return ""; }
+    }
+    function showToast(message) {
+      const toast = $("#toast"); toast.textContent = message; toast.classList.add("show");
+      clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove("show"), 2400);
+    }
+    function setStatus(node, message, error = false) {
+      node.textContent = message; node.classList.add("show"); node.classList.toggle("error", error);
+    }
+    function clearStatus(node) { node.textContent = ""; node.classList.remove("show", "error"); }
+    function numberFromLabel(value, prefix) {
+      if (typeof value === "number") return value;
+      const match = String(value || "").match(new RegExp("" + prefix + "\\s*(\\d+)", "i"));
+      return match ? Number(match[1]) : 0;
+    }
+    function buildEvidenceMap(data) {
+      const map = new Map();
+      (data.questions || []).forEach((question) => {
+        const e = question.evidence || {};
+        const p = numberFromLabel(e.paragraph ?? e.paragraphLabel, "P");
+        const s = Number(e.sentence ?? e.sentenceNumber ?? e.sentenceIndex ?? 0);
+        if (p > 0 && s > 0) {
+          const key = `${p - 1}:${s - 1}`;
+          if (!map.has(key)) map.set(key, []);
+          map.get(key).push({ number: question.number, quote: e.quote || e.text || "" });
+        } else if (e.quote) {
+          for (let pi = 0; pi < (data.paragraphs || []).length; pi++) {
+            const si = (data.paragraphs[pi].sentences || []).findIndex((sentence) => sentence.english && sentence.english.toLowerCase().includes(e.quote.toLowerCase()));
+            if (si >= 0) {
+              const key = `${pi}:${si}`;
+              if (!map.has(key)) map.set(key, []);
+              map.get(key).push({ number: question.number, quote: e.quote });
+              break;
+            }
+          }
+        }
+      });
+      return map;
+    }
+    function renderMarkedEnglish(text, keywords, evidence, questionNumbers, sentenceId) {
+      const spans = [];
+      const lower = text.toLowerCase();
+      (keywords || []).filter(Boolean).forEach((word) => {
+        const term = String(word).trim(); if (!term) return;
+        const regex = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
+        let match;
+        while ((match = regex.exec(text))) spans.push({ start: match.index, end: match.index + match[0].length, type: "word" });
+      });
+      let evidenceFound = false;
+      (evidence || []).forEach((item) => {
+        const quote = String(item.quote || "").trim();
+        if (!quote) return;
+        let start = 0;
+        while ((start = lower.indexOf(quote.toLowerCase(), start)) >= 0) {
+          spans.push({ start, end: start + quote.length, type: "evidence", question: item.number });
+          evidenceFound = true; start += quote.length;
+        }
+      });
+      if (!evidenceFound && evidence?.length) spans.push({ start: 0, end: text.length, type: "whole", question: evidence[0].number });
+      spans.sort((a, b) => a.start - b.start || (a.type === "evidence" ? -1 : 1) || (b.end - a.end));
+      const chosen = [];
+      for (const span of spans) {
+        const overlapIndex = chosen.findIndex((old) => span.start < old.end && span.end > old.start);
+        if (overlapIndex < 0) chosen.push(span);
+        else if (span.type === "evidence" && chosen[overlapIndex].type !== "evidence") chosen[overlapIndex] = span;
+      }
+      chosen.sort((a, b) => a.start - b.start);
+      let cursor = 0; let html = "";
+      for (const span of chosen) {
+        if (span.start < cursor) continue;
+        html += escapeHtml(text.slice(cursor, span.start));
+        const piece = escapeHtml(text.slice(span.start, span.end));
+        if (span.type === "evidence" || span.type === "whole") {
+          const qNum = span.question ?? questionNumbers[0];
+          html += `<mark class="answer-evidence" id="evidence-q${escapeHtml(qNum)}-${sentenceId}">${piece}</mark>`;
+        } else html += `<span class="vocab">${piece}</span>`;
+        cursor = span.end;
+      }
+      html += escapeHtml(text.slice(cursor));
+      if (questionNumbers.length) html += ` <span class="evidence-tag">${questionNumbers.map((n) => `Q${escapeHtml(n)}`).join(" · ")} 证据</span>`;
+      return html;
+    }
+    function renderParagraph(paragraph, paragraphIndex, evidenceMap) {
+      const sentences = paragraph.sentences || [];
+      const words = [...new Set([
+        ...(paragraph.keyWords || []).map((item) => typeof item === "string" ? item : item.word),
+        ...sentences.flatMap((sentence) => sentence.keyWords || [])
+      ].filter(Boolean))];
+      const sentenceHtml = sentences.map((sentence, sentenceIndex) => {
+        const key = `${paragraphIndex}:${sentenceIndex}`;
+        const evidence = evidenceMap.get(key) || [];
+        const ids = evidence.map((item) => item.number);
+        const sentenceId = `p${paragraphIndex + 1}-s${sentenceIndex + 1}`;
+        const body = renderMarkedEnglish(sentence.english || "", words, evidence, ids, sentenceId);
+        return `<div class="sentence" id="${sentenceId}">
+          <div class="sentence-en">${body}</div>
+          ${sentence.translation ? `<div class="sentence-zh">${escapeHtml(sentence.translation)}</div>` : `<div class="sentence-zh">译文待补</div>`}
+          ${sentence.structure ? `<details class="structure"><summary>句子结构 / 长难句拆解</summary><p>${escapeHtml(sentence.structure)}</p></details>` : ""}
+        </div>`;
+      }).join("");
+      const wordCards = (paragraph.keyWords || []).map((item) => {
+        const word = typeof item === "string" ? item : item.word;
+        const meaning = typeof item === "string" ? "点击 JSON 编辑器补充词义" : item.meaning || item.definition || "";
+        return `<div class="word-card"><strong>${escapeHtml(word)}</strong><span>${escapeHtml(meaning)}</span></div>`;
+      }).join("");
+      const phrases = (paragraph.keyPhrases || []).map((phrase) => `<span class="phrase-item">${escapeHtml(typeof phrase === "string" ? phrase : `${phrase.phrase || phrase.text || ""} ${phrase.meaning ? `· ${phrase.meaning}` : ""}`)}</span>`).join("");
+      const noteContent = (wordCards || phrases) ? `${wordCards ? `<div class="aside-label">本段重点词 / 熟词生义</div>${wordCards}` : ""}${phrases ? `<div class="phrase-list"><div class="aside-label">高频搭配 / 短语</div>${phrases}</div>` : ""}` : `<div class="aside-empty">本段词汇与短语可在 JSON 中补充。</div>`;
+      return `<section class="paragraph-grid" id="paragraph-${paragraphIndex + 1}">
+        <div class="paragraph-main">
+          <div class="paragraph-heading"><span class="paragraph-label">${escapeHtml(paragraph.label || `P${paragraphIndex + 1}`)}</span><span class="paragraph-gist">${escapeHtml(paragraph.gist || "")}</span></div>
+          ${sentenceHtml || `<div class="empty-state">本段还没有句子。</div>`}
+        </div>
+        <aside class="paragraph-aside">${noteContent}</aside>
+      </section>`;
+    }
+    function evidenceTarget(question) {
+      const e = question.evidence || {};
+      const p = numberFromLabel(e.paragraph ?? e.paragraphLabel, "P");
+      const s = Number(e.sentence ?? e.sentenceNumber ?? e.sentenceIndex ?? 0);
+      return p > 0 && s > 0 ? `evidence-q${question.number}-p${p}-s${s}` : "";
+    }
+    function renderQuestion(question) {
+      const correct = String(question.answer ?? question.correctOption ?? "").trim().toUpperCase();
+      const options = (question.options || []).map((option) => {
+        const label = option.label || "";
+        const isCorrect = String(label).toUpperCase() === correct;
+        return `<div class="option ${isCorrect ? "correct" : ""}"><span class="option-label">${escapeHtml(label)}</span><span>${escapeHtml(option.text || "")}${option.translation ? `<small class="option-zh">${escapeHtml(option.translation)}</small>` : ""}${option.reasoning ? `<small class="option-zh">${escapeHtml(option.reasoning)}</small>` : ""}</span></div>`;
+      }).join("");
+      const e = question.evidence || {};
+      const quote = e.quote || e.text || "";
+      const target = evidenceTarget(question);
+      const sourceText = quote ? `“${escapeHtml(quote)}”` : [e.paragraph, e.sentence ? `第 ${e.sentence} 句` : ""].filter(Boolean).join(" · ");
+      const jumpButton = target ? `<button type="button" data-target="${escapeHtml(target)}" class="jump-evidence">回原文看高亮 ↗</button>` : "";
+      return `<section class="question-card" id="question-${escapeHtml(question.number)}">
+        <div class="question-top"><span class="question-no">Q${escapeHtml(question.number)}${correct ? ` · 答案 ${escapeHtml(correct)}` : ""}</span><span class="question-type">${escapeHtml(question.type || "阅读理解")}</span></div>
+        <div class="question-stem">${escapeHtml(question.stem || "")}<small>${escapeHtml(question.stemTranslation || question.translation || "")}</small></div>
+        <div class="options">${options}</div>
+        ${question.analysis ? `<div class="question-analysis"><strong>为什么选 ${escapeHtml(correct || "")}</strong>　${escapeHtml(question.analysis)}</div>` : ""}
+        ${question.trap ? `<div class="question-analysis" style="margin-top:7px"><strong>易错点：</strong>${escapeHtml(question.trap)}</div>` : ""}
+        ${(quote || sourceText) ? `<div class="question-evidence"><strong>原文依据：</strong>${sourceText || "定位已高亮在原文"}${jumpButton}</div>` : ""}
+      </section>`;
+    }
+    function renderLesson(data) {
+      currentData = data;
+      const sourceUrl = safeUrl(data.sourcePdfUrl || data.officialPdfUrl || "");
+      $("#sourceUrl").value = sourceUrl;
+      const meta = [data.exam, data.year ? `${data.year} 年` : "", sourceUrl ? `<a class="source-link" href="${escapeHtml(sourceUrl)}" target="_blank" rel="noopener">官方 PDF ↗</a>` : ""].filter(Boolean).map((item) => item.startsWith("<a ") ? item : `<span class="meta-chip">${escapeHtml(item)}</span>`).join("");
+      const logic = (data.logicChain || []).map((item) => `<span>${escapeHtml(item)}</span>`).join("");
+      const evidenceMap = buildEvidenceMap(data);
+      const paragraphs = (data.paragraphs || []).map((paragraph, i) => renderParagraph(paragraph, i, evidenceMap)).join("");
+      const questions = (data.questions || []).map(renderQuestion).join("");
+      output.innerHTML = `<header class="lesson-head">
+        <div class="lesson-kicker">close reading · 逐句精读</div>
+        <h2 class="lesson-title">${escapeHtml(data.title || "英语阅读精读讲义")}</h2>
+        <div class="lesson-meta">${meta || `<span class="meta-chip">待补充年份 / 来源</span>`}</div>
+      </header>
+      ${data.centralIdea ? `<section class="overview"><div class="overview-label">全文主旨 / 逻辑</div><div class="overview-copy">${escapeHtml(data.centralIdea)}${logic ? `<div class="logic-chain">${logic}</div>` : ""}</div></section>` : ""}
+      <section class="reading-body"><div class="section-title">Paragraph by paragraph · 原文逐句对照</div>${paragraphs || `<div class="empty-state">导入讲义 JSON 后，逐段原文会显示在这里。</div>`}</section>
+      ${questions ? `<section class="question-section"><div class="section-title">Question evidence · 题目与原文证据</div>${questions}</section>` : ""}
+      ${data.takeaway ? `<section class="takeaway"><div class="takeaway-title">解题方法 / 本篇带走</div><div class="takeaway-copy">${escapeHtml(data.takeaway)}</div></section>` : ""}`;
+      try { localStorage.setItem("reading-studio-json", JSON.stringify(data)); } catch { /* Private browsing may disable storage. */ }
+    }
+    function applyEditor() {
+      const status = $("#jsonStatus"); clearStatus(status);
+      try {
+        const data = JSON.parse(jsonEditor.value);
+        if (!data || !Array.isArray(data.paragraphs)) throw new Error("需要包含 paragraphs 数组。");
+        renderLesson(data); setStatus(status, "已应用，讲义已刷新。照片不会随 JSON 导出。");
+      } catch (error) { setStatus(status, `JSON 格式有误：${error.message}`, true); }
+    }
+    function loadDemo() { jsonEditor.value = JSON.stringify(demo, null, 2); renderLesson(demo); showToast("已载入版式示例"); }
+    function downloadJson() {
+      const blob = new Blob([JSON.stringify(currentData, null, 2)], { type: "application/json;charset=utf-8" });
+      const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "english-reading-notes.json"; a.click(); URL.revokeObjectURL(a.href);
+    }
+    function copyText(text) {
+      if (navigator.clipboard?.writeText) return navigator.clipboard.writeText(text);
+      const helper = document.createElement("textarea"); helper.value = text; document.body.append(helper); helper.select(); document.execCommand("copy"); helper.remove(); return Promise.resolve();
+    }
+    function buildPrompt() {
+      const source = ocrField.value.trim();
+      const url = $("#sourceUrl").value.trim();
+      return `请按我的考研英语阅读精读习惯处理这篇阅读。\n\n流程要求：\n1. 先根据我在当前对话上传的原图核对题目；优先查找并核对考试机构、学校或权威网站发布的官方 PDF。若官方 PDF 找不到，明确说明来源和不确定处，不能把 OCR 猜测当成原文。${url ? `\n官方 PDF 线索：${url}` : ""}\n2. 先概括全文中心和逻辑链，再逐段说明段意。\n3. 原文每一句都必须保留，按“英文原句 → 紧跟中文翻译”排版，绝不跳句或只写大意。长难句拆主干、连词、从句、非谓语和修饰关系。\n4. 每段整理重点单词、熟词生义和固定短语；在英文原句中把重点词标红，并把段落词组单独整理。\n5. 每道题翻译题干和每个选项，标出正确答案对应的原文句/短语，解释同义替换，并逐项说明干扰项错因。\n6. 最后总结作者态度、文章逻辑和可复用的解题方法。不要编造题目、答案或官方来源。\n\n请只输出可直接导入本网页的 JSON，不要加 Markdown 代码围栏。字段格式如下：\n{\n  "title":"文章标题", "exam":"考试科目 / 年份 / Text", "year":"年份", "sourcePdfUrl":"官方 PDF URL", "centralIdea":"全文主旨", "logicChain":["逻辑步骤"],\n  "paragraphs":[{"label":"P1","gist":"段意","sentences":[{"english":"完整英文原句","translation":"对应中文翻译","structure":"句子结构拆解","keyWords":["重点词"]}],"keyWords":[{"word":"词语","meaning":"词性、语境义/熟词生义"}],"keyPhrases":["短语 · 中文义"]}],\n  "questions":[{"number":1,"type":"题型","stem":"题干英文","stemTranslation":"题干翻译","options":[{"label":"A","text":"选项英文","translation":"选项翻译","reasoning":"该项判断依据"}],"answer":"B","evidence":{"paragraph":"P1","sentence":1,"quote":"原文中的逐字证据"},"analysis":"答案推理","trap":"干扰项陷阱"}],\n  "takeaway":"本篇方法总结"\n}\n\n照片 / PDF OCR 草稿如下，请以官方原文和原图复核，不要照抄明显识别错误：\n---\n${source || "（尚未提取文字；我会在当前对话另外上传原图。）"}\n---`;
+    }
+    function updatePreviews(files) {
+      selectedFiles = Array.from(files || []);
+      previews.replaceChildren();
+      selectedFiles.forEach((file, index) => {
+        const item = document.createElement("div"); item.className = "preview-item";
+        const thumb = file.type.startsWith("image/") ? document.createElement("img") : Object.assign(document.createElement("div"), { className: "preview-file", textContent: "PDF" });
+        if (file.type.startsWith("image/")) thumb.src = URL.createObjectURL(file);
+        const name = document.createElement("span"); name.textContent = `${file.name} · ${(file.size / 1024).toFixed(0)} KB`;
+        const remove = document.createElement("button"); remove.type = "button"; remove.setAttribute("aria-label", `移除 ${file.name}`); remove.textContent = "×";
+        remove.addEventListener("click", () => { selectedFiles.splice(index, 1); updatePreviews(selectedFiles); });
+        item.append(thumb, name, remove); previews.append(item);
+      });
+      if (selectedFiles.length) showToast(`已添加 ${selectedFiles.length} 个文件`);
+    }
+    function loadScript(src) {
+      return new Promise((resolve, reject) => {
+        const existing = [...document.scripts].find((script) => script.src === src);
+        if (existing?.dataset.loaded === "true") return resolve();
+        if (existing) { existing.addEventListener("load", resolve, { once: true }); existing.addEventListener("error", reject, { once: true }); return; }
+        const script = document.createElement("script"); script.src = src; script.async = true;
+        script.onload = () => { script.dataset.loaded = "true"; resolve(); }; script.onerror = () => reject(new Error("识别组件加载失败，请检查网络后重试。"));
+        document.head.append(script);
+      });
+    }
+    async function ensureTesseract() {
+      if (window.Tesseract) return window.Tesseract;
+      await loadScript("https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js");
+      return window.Tesseract;
+    }
+    async function extractPdf(file, report) {
+      if (!window.pdfjsLib) {
+        await loadScript("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js");
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+      }
+      const pdf = await window.pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+      const pages = [];
+      for (let pageNo = 1; pageNo <= pdf.numPages; pageNo++) {
+        report(`读取 PDF 第 ${pageNo}/${pdf.numPages} 页…`);
+        const page = await pdf.getPage(pageNo);
+        const content = await page.getTextContent();
+        const lines = new Map();
+        content.items.forEach((item) => {
+          if (!item.str?.trim()) return;
+          const y = Math.round(item.transform?.[5] || 0);
+          if (!lines.has(y)) lines.set(y, []);
+          lines.get(y).push({ x: item.transform?.[4] || 0, text: item.str.trim() });
+        });
+        const text = [...lines.entries()].sort((a, b) => b[0] - a[0]).map(([, row]) => row.sort((a, b) => a.x - b.x).map((item) => item.text).join(" ")).join("\n");
+        if (text.trim().length > 25) pages.push(`【PDF 第 ${pageNo} 页】\n${text}`);
+        else {
+          const tesseract = await ensureTesseract();
+          const viewport = page.getViewport({ scale: 1.65 });
+          const canvas = document.createElement("canvas"); canvas.width = viewport.width; canvas.height = viewport.height;
+          await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+          const result = await tesseract.recognize(canvas, "eng+chi_sim", { logger: (m) => { if (m.status === "recognizing text") report(`PDF 扫描页 OCR ${pageNo}/${pdf.numPages}：${Math.round((m.progress || 0) * 100)}%`); } });
+          pages.push(`【PDF 第 ${pageNo} 页 · OCR】\n${result.data.text}`);
+        }
+      }
+      return pages.join("\n\n");
+    }
+    async function runOcr() {
+      const status = $("#ocrStatus"); clearStatus(status);
+      if (!selectedFiles.length) { setStatus(status, "先选择照片或 PDF。", true); return; }
+      const button = $("#ocrBtn"); button.disabled = true; button.textContent = "识别中…";
+      const chunks = [];
+      const report = (message) => setStatus(status, message);
+      try {
+        for (let i = 0; i < selectedFiles.length; i++) {
+          const file = selectedFiles[i]; report(`处理 ${i + 1}/${selectedFiles.length}：${file.name}`);
+          if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) chunks.push(await extractPdf(file, report));
+          else {
+            const tesseract = await ensureTesseract();
+            const result = await tesseract.recognize(file, "eng+chi_sim", { logger: (m) => { if (m.status === "recognizing text") report(`图片 OCR ${i + 1}/${selectedFiles.length}：${Math.round((m.progress || 0) * 100)}%`); } });
+            chunks.push(`【${file.name}】\n${result.data.text}`);
+          }
+        }
+        ocrField.value = chunks.join("\n\n"); setStatus(status, "识别完成。请先校正明显错字，再用“复制精读指令”交给 ChatGPT 核对。照片仍只在本机浏览器处理。");
+      } catch (error) { setStatus(status, `识别没有完成：${error.message}`, true); }
+      finally { button.disabled = false; button.textContent = "提取原文"; }
+    }
+
+    $("#renderBtn").addEventListener("click", applyEditor);
+    $("#formatBtn").addEventListener("click", () => { try { jsonEditor.value = JSON.stringify(JSON.parse(jsonEditor.value), null, 2); clearStatus($("#jsonStatus")); } catch (error) { setStatus($("#jsonStatus"), `JSON 格式有误：${error.message}`, true); } });
+    $("#loadDemoBtn").addEventListener("click", loadDemo);
+    $("#printBtn").addEventListener("click", () => window.print());
+    $("#exportBtn").addEventListener("click", downloadJson);
+    $("#importBtn").addEventListener("click", () => $("#jsonFile").click());
+    $("#jsonFile").addEventListener("change", async (event) => {
+      const file = event.target.files?.[0]; if (!file) return;
+      try { jsonEditor.value = await file.text(); applyEditor(); showToast("讲义 JSON 已导入"); }
+      catch (error) { setStatus($("#jsonStatus"), `文件读取失败：${error.message}`, true); }
+      event.target.value = "";
+    });
+    $("#sourceFiles").addEventListener("change", (event) => updatePreviews(event.target.files));
+    $("#ocrBtn").addEventListener("click", runOcr);
+    $("#openPdfBtn").addEventListener("click", () => {
+      const url = safeUrl($("#sourceUrl").value.trim());
+      if (!url) return showToast("先粘贴有效的官方 PDF 链接");
+      window.open(url, "_blank", "noopener,noreferrer");
+    });
+    $("#sourceUrl").addEventListener("change", () => {
+      currentData.sourcePdfUrl = safeUrl($("#sourceUrl").value.trim());
+      jsonEditor.value = JSON.stringify(currentData, null, 2);
+      renderLesson(currentData);
+    });
+    $("#copyPromptBtn").addEventListener("click", async () => {
+      try { await copyText(buildPrompt()); showToast("精读指令已复制；记得在当前对话上传原图"); }
+      catch { showToast("复制失败，请手动选择并复制 OCR 文本"); }
+    });
+    $("#clearSourceBtn").addEventListener("click", () => { ocrField.value = ""; updatePreviews([]); clearStatus($("#ocrStatus")); sourceFiles.value = ""; });
+    $("#dropZone").addEventListener("dragover", (event) => { event.preventDefault(); event.currentTarget.classList.add("dragover"); });
+    $("#dropZone").addEventListener("dragleave", (event) => event.currentTarget.classList.remove("dragover"));
+    $("#dropZone").addEventListener("drop", (event) => { event.preventDefault(); event.currentTarget.classList.remove("dragover"); updatePreviews(event.dataTransfer.files); });
+    output.addEventListener("click", (event) => {
+      const button = event.target.closest(".jump-evidence"); if (!button) return;
+      const target = document.getElementById(button.dataset.target);
+      if (target) { target.scrollIntoView({ behavior: "smooth", block: "center" }); target.classList.add("evidence-focus"); setTimeout(() => target.classList.remove("evidence-focus"), 900); }
+    });
+
+    try {
+      const saved = localStorage.getItem("reading-studio-json");
+      if (saved) { currentData = JSON.parse(saved); jsonEditor.value = JSON.stringify(currentData, null, 2); $("#sourceUrl").value = currentData.sourcePdfUrl || currentData.officialPdfUrl || ""; renderLesson(currentData); }
+      else { jsonEditor.value = JSON.stringify(demo, null, 2); renderLesson(demo); }
+    } catch { jsonEditor.value = JSON.stringify(demo, null, 2); renderLesson(demo); }
+  </script>
+</body>
+</html>
