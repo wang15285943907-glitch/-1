@@ -87,6 +87,9 @@
     .divider { height: 1px; background: #edf0ec; margin: 19px 0 4px; }
     .privacy-note { display: flex; gap: 8px; align-items: flex-start; margin-top: 15px; background: #f7f8f4; border-radius: 10px; padding: 10px; color: #71827f; font-size: 10px; line-height: 1.55; }
     .privacy-note span:first-child { color: var(--teal); }
+    .optional-pdf { margin-top: 16px; padding-top: 13px; border-top: 1px solid #edf0ec; }
+    .optional-pdf summary { cursor: pointer; color: #55756e; font-size: 11px; font-weight: 750; }
+    .source-search-link { display: inline-block; margin-top: 9px; color: #167a70; font-size: 11px; font-weight: 750; text-decoration: underline; text-underline-offset: 3px; }
     .main-column { min-width: 0; }
     .workflow-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-bottom: 16px; }
     .workflow-step { border: 1px solid #dfe8e3; background: rgba(255,255,255,.72); border-radius: 12px; padding: 11px 12px; display: flex; gap: 9px; align-items: center; color: #6d8180; font-size: 10px; line-height: 1.4; }
@@ -233,52 +236,60 @@
       <div>
         <div class="eyebrow">考研英语 · 精读工作台</div>
         <h1>原文读得清，证据看得见。</h1>
-        <p>把题目照片发在当前 ChatGPT 对话里，我先根据年份、科目和题目线索检索并核对官方 PDF；网页只接收已确认的 PDF 文字和精读讲义，排出英文逐句对照、红色重点词、段落侧注与答案证据高亮。</p>
+        <p>把题目照片发在当前 ChatGPT 对话里，网页可按年份、科目和篇目自动打开官方站点 PDF 搜索；不要求你先找到或上传 PDF。ChatGPT 根据照片线索核对原文并生成讲义，网页负责逐句排版、标红重点词、整理段落侧注和高亮答案证据。</p>
       </div>
       <div class="progress-pill"><strong>01 — 03</strong>官方 PDF → 精读 → 讲义</div>
     </section>
 
     <main class="workspace">
       <aside class="panel source-panel">
-        <div class="panel-head"><h2>官方 PDF 原文</h2><span class="step">SOURCE FIRST</span></div>
+        <div class="panel-head"><h2>自动查找官方 PDF</h2><span class="step">SOURCE FIRST</span></div>
         <div class="source-body">
-          <label class="upload-zone" id="dropZone" for="sourceFiles">
-            <span class="upload-icon">＋</span>
-            <strong>选择已确认的官方 PDF</strong>
-            <small>照片请直接上传到当前 ChatGPT 对话<br>此处只读取官方 PDF，不用 OCR 猜原文</small>
-          </label>
-          <input id="sourceFiles" class="file-picker" type="file" accept="application/pdf,.pdf" multiple>
-          <div id="previewList" class="preview-list"></div>
-
           <label class="field-label" for="examYear">年份 / 考试信息</label>
           <input class="text-input" id="examYear" type="text" placeholder="例如：2014">
           <label class="field-label" for="examPaper">科目与试卷</label>
           <input class="text-input" id="examPaper" type="text" placeholder="例如：考研英语二">
           <label class="field-label" for="passageNo">文章编号</label>
           <input class="text-input" id="passageNo" type="text" placeholder="例如：Text 1 / 阅读第 2 篇">
-          <label class="field-label" for="sourceUrl">官方 PDF 链接（可选）</label>
-          <input class="text-input" id="sourceUrl" type="url" placeholder="粘贴学校 / 考试官网的 PDF 链接">
           <div class="button-row">
-            <button class="button" id="openPdfBtn" type="button">打开官方 PDF</button>
-            <button class="button teal" id="extractPdfBtn" type="button">提取 PDF 文字</button>
+            <button class="button teal" id="searchOfficialBtn" type="button">自动查找官方 PDF</button>
+            <button class="button" id="copyPromptBtn" type="button">复制照片精读请求</button>
+          </div>
+          <div id="searchLinks" class="hidden">
+            <a id="searchResultsLink" class="source-search-link" target="_blank" rel="noopener noreferrer">Bing 搜索结果 ↗</a>
+            <span aria-hidden="true"> · </span>
+            <a id="searchBaiduLink" class="source-search-link" target="_blank" rel="noopener noreferrer">百度备用搜索 ↗</a>
           </div>
           <div id="pdfStatus" class="status" role="status" aria-live="polite"></div>
-          <label class="field-label" for="pdfText">官方 PDF 可复制文字</label>
-          <textarea class="text-area" id="pdfText" placeholder="选择官方 PDF 后提取它自带的文字层。若 PDF 是扫描图片、没有文字层，网页会停止提取；请直接把 PDF 发到 ChatGPT 对话里核对。"></textarea>
-          <div class="button-row">
-            <button class="button teal" id="copyPromptBtn" type="button">复制官方 PDF 检索指令</button>
-            <button class="button" id="clearSourceBtn" type="button">清空</button>
-          </div>
-          <p class="helper">这页不做图片 OCR。把照片发在当前对话后，我会先找官方 PDF 并核对发布机构、年份、科目和文章编号；没找到就先说明，不会用 OCR 代替原文。</p>
-          <div class="divider"></div>
-          <div class="privacy-note"><span>◈</span><span>上传的官方 PDF 在浏览器本地解析，不会发给项目服务器。此页只提取 PDF 原有文字层；扫描版无文字层时会提示停止，不启动 OCR。</span></div>
+          <p class="helper">搜索按高校 / 考试机构官网和 PDF 文件类型生成。搜索结果只是线索，ChatGPT 还会核对年份、科目、篇目和题目；无需你提供 PDF。照片请发在当前对话里，网页不做图片 OCR。</p>
+          <details class="optional-pdf">
+            <summary>可选：在本地提取官方 PDF 文字层</summary>
+            <p class="helper">此项可以跳过。若你已有 PDF，可在浏览器本地读取它的原生文字层；扫描图片不会 OCR，也不会上传到项目服务器。</p>
+            <label class="field-label" for="sourceUrl">已确认 PDF 地址（可选）</label>
+            <input class="text-input" id="sourceUrl" type="url" placeholder="自动检索后可由讲义 JSON 带入；无需手工填写">
+            <div class="button-row">
+              <button class="button" id="openPdfBtn" type="button">打开 PDF 地址</button>
+              <button class="button teal" id="extractPdfBtn" type="button">提取所选 PDF 文字</button>
+            </div>
+            <label class="upload-zone" id="dropZone" for="sourceFiles" style="margin-top:12px;min-height:112px">
+              <span class="upload-icon">＋</span>
+              <strong>可选：选择已确认的官方 PDF</strong>
+              <small>只读取 PDF 自带文字层，不用 OCR 猜原文</small>
+            </label>
+            <input id="sourceFiles" class="file-picker" type="file" accept="application/pdf,.pdf" multiple>
+            <div id="previewList" class="preview-list"></div>
+            <label class="field-label" for="pdfText">PDF 可复制文字（可选）</label>
+            <textarea class="text-area" id="pdfText" placeholder="选择 PDF 后提取它自带的文字层；没有文字层时会停止，不使用 OCR。"></textarea>
+            <button class="button small" id="clearSourceBtn" type="button" style="margin-top:9px">清空本地 PDF 文字</button>
+          </details>
+          <div class="privacy-note"><span>◈</span><span>照片只作为题目线索发给当前 ChatGPT 对话；搜索直接打开公开搜索页。可选 PDF 仅在浏览器本地解析，不上传给项目服务器。</span></div>
         </div>
       </aside>
 
       <section class="main-column">
         <div class="workflow-strip" aria-label="使用步骤">
-          <div class="workflow-step"><b>1</b><span>在 ChatGPT 上传照片，先检索官方 PDF</span></div>
-          <div class="workflow-step"><b>2</b><span>以官方 PDF 核对原文、题目和答案</span></div>
+          <div class="workflow-step"><b>1</b><span>上传题目照片，自动搜索官方 PDF</span></div>
+          <div class="workflow-step"><b>2</b><span>核对 PDF 与照片中的文章和题目</span></div>
           <div class="workflow-step"><b>3</b><span>导入讲义 JSON，排版并保存 PDF</span></div>
         </div>
 
@@ -559,6 +570,24 @@
       if (navigator.clipboard?.writeText) return navigator.clipboard.writeText(text);
       const helper = document.createElement("textarea"); helper.value = text; document.body.append(helper); helper.select(); document.execCommand("copy"); helper.remove(); return Promise.resolve();
     }
+    function buildOfficialPdfSearchQuery() {
+      const year = $("#examYear").value.trim();
+      const exam = $("#examPaper").value.trim();
+      const passage = $("#passageNo").value.trim();
+      const terms = [year, "全国硕士研究生招生考试", exam || "考研英语", passage, "试题"].filter(Boolean);
+      return `${terms.join(" ")} site:edu.cn filetype:pdf`;
+    }
+    function openOfficialPdfSearch() {
+      const query = buildOfficialPdfSearchQuery();
+      const bingUrl = `https://www.bing.com/search?q=${encodeURIComponent(query)}`;
+      const baiduUrl = `https://www.baidu.com/s?wd=${encodeURIComponent(query)}`;
+      const results = $("#searchLinks");
+      $("#searchResultsLink").href = bingUrl;
+      $("#searchBaiduLink").href = baiduUrl;
+      results.classList.remove("hidden");
+      window.open(bingUrl, "_blank", "noopener,noreferrer");
+      setStatus($("#pdfStatus"), "已按当前线索自动打开 PDF 搜索。请只采用考试机构或高校官网发布的 PDF，并核对篇目与题目；搜索结果本身不代表来源已核验。")
+    }
     function buildPrompt() {
       const year = $("#examYear").value.trim();
       const exam = $("#examPaper").value.trim();
@@ -566,7 +595,7 @@
       const url = $("#sourceUrl").value.trim();
       const pdfText = pdfTextField.value.trim();
       const details = [year && `年份：${year}`, exam && `科目：${exam}`, passage && `文章编号：${passage}`].filter(Boolean).join("\n");
-      return `请处理我在当前对话上传的英语阅读题照片。必须先联网检索并核对官方 PDF，再开始翻译和做题。\n\n题目线索：\n${details || "请从照片内容识别年份、科目和文章编号；识别不确定的地方先问我。"}${url ? `\n已有 PDF 链接线索：${url}` : ""}\n\n原文来源硬性要求：\n1. 先用照片辨认试卷线索，再联网搜索发布机构、考试机构或学校官方站点上的 PDF。打开 PDF 核对年份、科目、文章编号、文章标题/首句和题目选项，确认与照片是同一篇。\n2. 只把经过核验的官方 PDF 当作原文依据。照片只用于定位和比对；不要用 OCR 文本、搜索摘要、培训机构转载或记忆补写原文。下面若附有 PDF 文字层，也只能作为待核对材料，不能证明 PDF 来源官方。\n3. 在回答开头给出 PDF 标题、发布机构、官方 URL 和核验到的匹配信息。若找不到可核验的官方 PDF，或照片信息不足以唯一定位，先说明查找结果并向我索要年份/科目/文章编号/官方 PDF；不要退回用 OCR 继续制作讲义。\n\n确认官方 PDF 后，按我的阅读习惯讲解：\n1. 先讲全文中心和逻辑链，再逐段说明段意。\n2. 每段每句完整保留，严格按“英文原句 → 紧跟中文翻译”排版，不跳句、不删句、不只写大意。拆长难句的主干、连词、从句、非谓语和修饰关系。\n3. 每段整理重点词、熟词生义和固定短语；重点词要能在英文原句里标红，段落词组放旁栏。\n4. 每道题翻译题干和全部选项；正确答案要定位到官方 PDF 的具体段落、句子和原文短语，解释同义替换，并逐项说明干扰项错因。\n5. 总结作者态度、全文逻辑和可复用的解题方法。答案和原文必须能在已核验 PDF 中找到依据。\n\n仅当官方 PDF 已核验、且文章题目完整时，才输出可直接导入本网页的 JSON；不要加 Markdown 代码围栏。字段如下：\n{\n  "title":"文章标题", "exam":"考试科目 / 年份 / Text", "year":"年份", "sourcePdfUrl":"官方 PDF URL", "sourceTitle":"PDF 标题", "sourcePublisher":"发布机构", "sourceVerificationNote":"用哪些信息确认它与照片一致", "centralIdea":"全文主旨", "logicChain":["逻辑步骤"],\n  "paragraphs":[{"label":"P1","gist":"段意","sentences":[{"english":"官方 PDF 中的完整英文原句","translation":"对应中文翻译","structure":"句子结构拆解","keyWords":["重点词"]}],"keyWords":[{"word":"词语","meaning":"词性、语境义/熟词生义"}],"keyPhrases":["短语 · 中文义"]}],\n  "questions":[{"number":1,"type":"题型","stem":"题干英文","stemTranslation":"题干翻译","options":[{"label":"A","text":"选项英文","translation":"选项翻译","reasoning":"该项判断依据"}],"answer":"B","evidence":{"paragraph":"P1","sentence":1,"quote":"官方 PDF 中逐字对应的证据"},"analysis":"答案推理","trap":"干扰项陷阱"}],\n  "takeaway":"本篇方法总结"\n}\n\n以下文字若存在，是我从已选 PDF 中读取到的可复制文字层，仅供你与网上核验到的官方 PDF 对照；不要把它当作图片 OCR，也不要据此认定来源官方：\n---\n${pdfText || "（没有附 PDF 文字层；请直接在线检索并打开官方 PDF。）"}\n---`;
+      return `请处理我在当前对话上传的英语阅读题照片。官方 PDF 要由你自己联网查找；不要要求我先找到、提供或上传 PDF。\n\n题目线索：\n${details || "请根据照片视觉内容识别年份、英语一/英语二、文章编号、题干和选项；不要把 OCR/自动识别结果当成准确原文。"}${url ? `\n可选线索（不代表官方来源）：${url}` : ""}\n\n原文来源要求：\n1. 先根据照片中的年份、科目、篇目、题干或选项关键词检索官方 PDF。优先查考试机构官网；也可查学校官网发布的历年试题 PDF。照片只用于定位，不能替代原文；不要引用搜索摘要、培训机构转载或记忆补写。\n2. 打开 PDF 核对年份、科目、文章编号、文章标题或首句，以及题干和选项。必须确认是同一篇阅读文章，不能只凭文件名判断。\n3. 在回答开头给出 PDF 标题、发布机构/托管机构、官方来源页、PDF 链接，并说明它是考试机构发布还是高校官网存档，以及核验到的匹配信息。下面若附有本地提取文字，也只作为比对线索，不能证明 PDF 来源官方。\n4. 如果找不到可核验的官方 PDF，报告实际搜索过的官网和未找到的证据；不要让我补交 PDF，也不要退回用 OCR 猜原文或继续编讲义。若照片线索不足以区分试卷，只问缺少的年份、科目或篇目线索。\n\n确认官方 PDF 后，按我的阅读习惯讲解：\n1. 先讲全文中心和逻辑链，再逐段说明段意。\n2. 每段每句完整保留，严格按“英文原句 → 紧跟中文翻译”排版，不跳句、不删句、不只写大意。拆长难句的主干、连词、从句、非谓语和修饰关系。\n3. 每段整理重点词、熟词生义和固定短语；重点词要能在英文原句里标红，段落词组放旁栏。\n4. 每道题翻译题干和全部选项；正确答案要定位到官方 PDF 的具体段落、句子和原文短语，解释同义替换，并逐项说明干扰项错因。\n5. 总结作者态度、全文逻辑和可复用的解题方法。答案和原文必须能在已核验 PDF 中找到依据。\n\n仅当官方 PDF 已核验、且文章题目完整时，才输出可直接导入本网页的 JSON；不要加 Markdown 代码围栏。字段如下：\n{\n  "title":"文章标题", "exam":"考试科目 / 年份 / Text", "year":"年份", "sourcePdfUrl":"官方 PDF URL", "sourceTitle":"PDF 标题", "sourcePublisher":"发布机构或托管高校", "sourceVerificationNote":"来源类型，以及用哪些信息确认它与照片一致", "centralIdea":"全文主旨", "logicChain":["逻辑步骤"],\n  "paragraphs":[{"label":"P1","gist":"段意","sentences":[{"english":"官方 PDF 中的完整英文原句","translation":"对应中文翻译","structure":"句子结构拆解","keyWords":["重点词"]}],"keyWords":[{"word":"词语","meaning":"词性、语境义/熟词生义"}],"keyPhrases":["短语 · 中文义"]}],\n  "questions":[{"number":1,"type":"题型","stem":"题干英文","stemTranslation":"题干翻译","options":[{"label":"A","text":"选项英文","translation":"选项翻译","reasoning":"该项判断依据"}],"answer":"B","evidence":{"paragraph":"P1","sentence":1,"quote":"官方 PDF 中逐字对应的证据"},"analysis":"答案推理","trap":"干扰项陷阱"}],\n  "takeaway":"本篇方法总结"\n}\n\n以下文字若存在，是我从可选 PDF 读取到的文字层，仅供你与网上核验到的官方 PDF 对照；不要把它当作图片 OCR，也不要据此认定来源官方：\n---\n${pdfText || "（没有本地 PDF 文字层；请自行联网查找并打开官方 PDF。）"}\n---`;
     }
     function updatePreviews(files) {
       const incoming = Array.from(files || []);
@@ -581,7 +610,7 @@
         remove.addEventListener("click", () => { selectedFiles.splice(index, 1); updatePreviews(selectedFiles); });
         item.append(thumb, name, remove); previews.append(item);
       });
-      if (rejected) setStatus($("#pdfStatus"), "此处只接收官方 PDF。题目照片请直接发到当前 ChatGPT 对话，供我识别线索并查找官方原件。", true);
+      if (rejected) setStatus($("#pdfStatus"), "这里仅可选读取 PDF。题目照片请发到当前 ChatGPT 对话；本页不接收照片，也不做 OCR。", true);
       if (selectedFiles.length) showToast(`已添加 ${selectedFiles.length} 个文件`);
     }
     function loadScript(src) {
@@ -617,8 +646,8 @@
         if (text.trim()) pages.push(`【PDF 第 ${pageNo} 页 · 原生文字层】\n${text}`);
         else scannedPages.push(pageNo);
       }
-      if (!pages.length) throw new Error("这个 PDF 没有可复制的文字层，页面不会用 OCR 猜原文。请把 PDF 上传到当前 ChatGPT 对话，或换一份可搜索文字的官方 PDF。");
-      if (scannedPages.length) pages.push(`【核对提醒】第 ${scannedPages.join("、")} 页没有可复制文字层。不要用 OCR 补写这些页面；请在当前 ChatGPT 对话直接上传 PDF 进行视觉核对。`);
+      if (!pages.length) throw new Error("这个 PDF 没有可复制的文字层，页面不会用 OCR 猜原文。请使用官方可搜索文字版；也可让 ChatGPT 直接查看公开的官方 PDF 页面，无需你上传 PDF。");
+      if (scannedPages.length) pages.push(`【核对提醒】第 ${scannedPages.join("、")} 页没有可复制文字层。不要用 OCR 补写这些页面；请由 ChatGPT 对照公开的官方 PDF 页面核验。`);
       return pages.join("\n\n");
     }
     async function extractOfficialPdfText() {
@@ -651,6 +680,7 @@
     });
     $("#sourceFiles").addEventListener("change", (event) => updatePreviews(event.target.files));
     $("#extractPdfBtn").addEventListener("click", extractOfficialPdfText);
+    $("#searchOfficialBtn").addEventListener("click", openOfficialPdfSearch);
     $("#openPdfBtn").addEventListener("click", () => {
       const url = safeUrl($("#sourceUrl").value.trim());
       if (!url) return showToast("先粘贴有效的官方 PDF 链接");
@@ -662,7 +692,7 @@
       renderLesson(currentData);
     });
     $("#copyPromptBtn").addEventListener("click", async () => {
-      try { await copyText(buildPrompt()); showToast("官方 PDF 检索指令已复制；在当前对话上传题目照片"); }
+      try { await copyText(buildPrompt()); showToast("精读请求已复制；与题目照片一起发到当前对话即可，PDF 由 ChatGPT 自行查找"); }
       catch { showToast("复制失败，请检查浏览器剪贴板权限"); }
     });
     $("#clearSourceBtn").addEventListener("click", () => { pdfTextField.value = ""; updatePreviews([]); clearStatus($("#pdfStatus")); sourceFiles.value = ""; });
