@@ -259,6 +259,7 @@
             <a id="searchResultsLink" class="source-search-link" target="_blank" rel="noopener noreferrer">Bing 搜索结果 ↗</a>
             <span aria-hidden="true"> · </span>
             <a id="searchBaiduLink" class="source-search-link" target="_blank" rel="noopener noreferrer">百度备用搜索 ↗</a>
+            <br><a id="schoolOnlySearchLink" class="source-search-link" target="_blank" rel="noopener noreferrer">只看高校官网 PDF ↗</a>
           </div>
           <div id="pdfStatus" class="status" role="status" aria-live="polite"></div>
           <p class="helper">搜索按高校 / 考试机构官网和 PDF 文件类型生成。搜索结果只是线索，ChatGPT 还会核对年份、科目、篇目和题目；无需你提供 PDF。照片请发在当前对话里，网页不做图片 OCR。</p>
@@ -574,19 +575,22 @@
       const year = $("#examYear").value.trim();
       const exam = $("#examPaper").value.trim();
       const passage = $("#passageNo").value.trim();
-      const terms = [year, "全国硕士研究生招生考试", exam || "考研英语", passage, "试题"].filter(Boolean);
-      return `${terms.join(" ")} site:edu.cn filetype:pdf`;
+      const normalizedExam = exam.replace(/考研/g, "").replace(/英语一/g, "英语（一）").replace(/英语二/g, "英语（二）");
+      const terms = [year, "全国硕士研究生招生考试", normalizedExam || "考研英语", passage, "试题 PDF 高校官网"].filter(Boolean);
+      return terms.join(" ");
     }
     function openOfficialPdfSearch() {
       const query = buildOfficialPdfSearchQuery();
       const bingUrl = `https://www.bing.com/search?q=${encodeURIComponent(query)}`;
       const baiduUrl = `https://www.baidu.com/s?wd=${encodeURIComponent(query)}`;
+      const schoolOnlyUrl = `https://www.bing.com/search?q=${encodeURIComponent(`${query} site:edu.cn filetype:pdf`)}`;
       const results = $("#searchLinks");
       $("#searchResultsLink").href = bingUrl;
       $("#searchBaiduLink").href = baiduUrl;
+      $("#schoolOnlySearchLink").href = schoolOnlyUrl;
       results.classList.remove("hidden");
       window.open(bingUrl, "_blank", "noopener,noreferrer");
-      setStatus($("#pdfStatus"), "已按当前线索自动打开 PDF 搜索。请只采用考试机构或高校官网发布的 PDF，并核对篇目与题目；搜索结果本身不代表来源已核验。")
+      setStatus($("#pdfStatus"), "已按当前线索自动打开宽范围 PDF 搜索；若结果太多，可点“只看高校官网 PDF”。请核对篇目与题目，搜索结果本身不代表来源已核验。")
     }
     function buildPrompt() {
       const year = $("#examYear").value.trim();
